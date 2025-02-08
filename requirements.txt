@@ -1,0 +1,14 @@
+numpy==1.25.2
+python-dotenv
+openpyxl
+pandas
+langchain
+langchain-community
+langchain-openai
+langchain-pinecone
+openai
+pinecone-client
+fastapi
+uvicorn
+sqladmin
+alembic
