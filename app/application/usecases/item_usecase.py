@@ -1,8 +1,10 @@
 from typing import Optional, List
 from app.domain.models.item import Item
 from app.domain.repositories.item_repository_interface import ItemRepositoryInterface
+from injector import inject
 
 class ItemUseCase:
+    @inject
     def __init__(self, item_repository: ItemRepositoryInterface):
         self.item_repository = item_repository
 
