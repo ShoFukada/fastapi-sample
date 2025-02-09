@@ -37,6 +37,23 @@ alembic init alembic
 uvicorn app.main:app --reload
 ```
 
+### clone後方法
+```
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+別ターミナルでpostgre立ち上げ作成
+```
+cd docker
+docker-compose up -d
+```
+マイグレーションとアプリ立ち上げ
+```
+alembic upgrade head
+uvicorn app.main:app --reload
+```
+
 ### sql関連
 - sqlArchemyの設定
     - db/session.pyにて初期化コード
@@ -109,5 +126,5 @@ class AppModule(Module):
 - Alembic→マイグレーション管理(スキーマの変更履歴の管理)
 
 ## TODO
-- chatmessages endpoint
-- user auth
+- chatmessages endpoint→streaming注意、langchainなども使う
+- user auth→fastapi使う
