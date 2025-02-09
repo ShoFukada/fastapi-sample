@@ -34,3 +34,11 @@ class ChatSessionRepository(ChatSessionRepositoryInterface):
         if not record:
             return None
         return record.to_entity()
+    
+    def delete_session(self, session_id: str) -> bool:
+        record = self._db.query(ChatSessionORM).filter(ChatSessionORM.session_id == session_id).first()
+        if not record:
+            return False
+        self._db.delete(record)
+        self._db.commit()
+        return True

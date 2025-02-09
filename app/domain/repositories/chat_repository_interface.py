@@ -15,3 +15,7 @@ class ChatSessionRepositoryInterface(ABC):
     @abstractmethod
     def get_session(self, session_id: str) -> Optional[ChatSession]:
         raise NotImplementedError
+    
+    @abstractmethod
+    def delete_session(self, session_id: str) -> bool:
+        raise NotImplementedError

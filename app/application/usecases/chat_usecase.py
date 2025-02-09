@@ -21,3 +21,6 @@ class ChatSessionUseCase:
 
     def get_session(self, session_id: str) -> Optional[ChatSession]:
         return self.chat_session_repository.get_session(session_id)
+    
+    def delete_session(self, session_id: str) -> bool:
+        return self.chat_session_repository.delete_session(session_id)
