@@ -12,8 +12,6 @@ from app.presentation.schemas import DecodedTokenData  # TokenDataに user_id �
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-print("SECRET_KEY, ALGORITHM")
-print(SECRET_KEY, ALGORITHM)
 # 環境変数が文字列の場合は int に変換
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
