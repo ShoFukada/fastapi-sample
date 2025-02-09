@@ -11,10 +11,11 @@ class ChatSessionUseCase:
     def list_chat_session(self) -> List[ChatSession]:
         return self.chat_session_repository.list_chat_session()
 
-    def create_chat_session(self, session_id: str, user_id: str) -> ChatSession:
+    def create_chat_session(self, user_id: str, title: Optional[str]) -> ChatSession:
         new_chat_session = ChatSession(
-            session_id=session_id,
-            user_id=user_id
+            session_id=0,
+            user_id=user_id,
+            title=title
         )
         return self.chat_session_repository.create_chat_session(new_chat_session)
 

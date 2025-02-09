@@ -7,6 +7,10 @@ from app.application.usecases.chat_usecase import ChatSessionUseCase
 from app.domain.repositories.chat_repository_interface import ChatSessionRepositoryInterface
 from app.infrastructure.repositories.chat_repository import ChatSessionRepository
 
+from app.application.usecases.user_usecase import UserUseCase
+from app.domain.repositories.user_repository_interface import UserRepositoryInterface
+from app.infrastructure.repositories.user_repository import UserRepository
+
 
 class AppModule(Module):
 
@@ -16,5 +20,8 @@ class AppModule(Module):
 
         binder.bind(ChatSessionRepositoryInterface, to=ChatSessionRepository, scope=singleton)
         binder.bind(ChatSessionUseCase, scope=singleton)
+
+        binder.bind(UserRepositoryInterface, to=UserRepository, scope=singleton)
+        binder.bind(UserUseCase, scope=singleton)
 
 injector = Injector([AppModule()])

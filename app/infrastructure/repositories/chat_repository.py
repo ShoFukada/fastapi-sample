@@ -21,7 +21,6 @@ class ChatSessionRepository(ChatSessionRepositoryInterface):
 
     def create_chat_session(self, chat_session: ChatSessionORM) -> ChatSessionORM:
         record = ChatSessionORM(
-            session_id=chat_session.session_id,
             user_id=chat_session.user_id,
             created_at=chat_session.created_at
         )

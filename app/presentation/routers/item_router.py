@@ -11,23 +11,12 @@ from app.domain.models.item import Item
 from app.core.di_container import injector
 from app.application.usecases.item_usecase import ItemUseCase
 from app.infrastructure.repositories.item_repository import ItemRepository
+from app.core.dependencies import get_item_usecase, get_current_user_dependency
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
-def get_item_usecase(db: Session = Depends(get_db)) -> ItemUseCase:
-    """
-    UseCase を Injector から取り出し、その中の Repository に
-    リクエストごとの db session を注入するための関数
-    """
-    # singletonについては初回injector.get()でインスタンスが生成され、以降はそれを返す
-    usecase = injector.get(ItemUseCase)
-    # Repository が ItemRepository ならセッションをセット
-    if isinstance(usecase.item_repository, ItemRepository):
-        usecase.item_repository.set_db_session(db)
-    return usecase
-
 @router.get("/", response_model=List[ItemResponse])
-def list_items(usecase: ItemUseCase = Depends(get_item_usecase)):
+def list_items(usecase: ItemUseCase = Depends(get_item_usecase), current_user = Depends(get_current_user_dependency)):
     items = usecase.get_items()
     return [
         ItemResponse(

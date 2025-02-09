@@ -17,7 +17,20 @@ class UserORM(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     email = Column(String(255), unique=True, nullable=False)
     display_name = Column(String(255), nullable=True)
+    hashed_password = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    def to_entity(self):
+        from app.domain.models.user import User
+        return User(
+            id=self.id,
+            email=self.email,
+            display_name=self.display_name,
+            hashed_password=self.hashed_password,
+            created_at=self.created_at,
+            updated_at=self.updated_at
+        )
 
 
 # Item

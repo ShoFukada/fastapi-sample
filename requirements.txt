@@ -14,3 +14,6 @@ sqladmin
 alembic
 injector
 psycopg2-binary
+
+python-jose
+passlib[bcrypt]

@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
+from typing import Optional, List, Dict, Any
 
 # Item
 
@@ -42,3 +43,35 @@ class MessageResponse(BaseModel):
     created_at: datetime
     # prompt: Optional[str]
     # filter_query: Optional[FilterQuery]
+
+
+# User
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+class DecodedTokenData(BaseModel):
+    user_id: Optional[str] = None
+
+class UserCreateRequest(BaseModel):
+    email: str
+    display_name: Optional[str]
+    password: str
+
+class UserCreateResponse(BaseModel):
+    id: str
+    email: str
+    display_name: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+
+class UserReadResponse(BaseModel):
+    id: str
+    email: str
+    display_name: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+
+class UserLoginRequest(BaseModel):
+    email: str
+    password: str

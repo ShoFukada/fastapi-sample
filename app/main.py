@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
-from app.presentation.routers import item_router, chat_router
+from app.presentation.routers import item_router, chat_router, user_router
 from dotenv import load_dotenv
 from app.infrastructure.db.session import engine
 from app.presentation.admin.model_views import ItemModelView, UserModelView, ChatSessionModelView, ChatMessageModelView, RetrievedDocModelView
@@ -27,6 +27,7 @@ admin.add_model_view(RetrievedDocModelView)
 
 app.include_router(item_router.router)
 app.include_router(chat_router.router)
+app.include_router(user_router.router)
 
 @app.get("/health")
 def health():
