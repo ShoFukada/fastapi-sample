@@ -2,10 +2,11 @@
 # dataclassは、__init__や__repr__などの特殊メソッドを自動生成する
 
 from dataclasses import dataclass
+import uuid
 
 @dataclass
 class Item:
-    id: int
+    id: str
     name: str
     price: int
     discount_rate: float

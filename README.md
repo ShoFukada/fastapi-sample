@@ -109,6 +109,5 @@ class AppModule(Module):
 - Alembic→マイグレーション管理(スキーマの変更履歴の管理)
 
 ## TODO
-- tests
-- DI
-- chatbotなど外部ロジック含めて見る
+- chatmessages endpoint
+- user auth

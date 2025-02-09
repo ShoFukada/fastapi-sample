@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
-from app.presentation.routers import item_router
+from app.presentation.routers import item_router, chat_router
 from dotenv import load_dotenv
 from app.infrastructure.db.session import engine
-from app.presentation.admin.model_views import ItemModelView
+from app.presentation.admin.model_views import ItemModelView, UserModelView, ChatSessionModelView, ChatMessageModelView, RetrievedDocModelView
 load_dotenv()
 
 app = FastAPI(title="Sample API", description="This is a sample API", version="0.1.0")
@@ -20,8 +20,14 @@ app.add_middleware(
 #  Add Admin
 admin = Admin(app, engine=engine)
 admin.add_model_view(ItemModelView)
+admin.add_model_view(UserModelView)
+admin.add_model_view(ChatSessionModelView)
+admin.add_model_view(ChatMessageModelView)
+admin.add_model_view(RetrievedDocModelView)
 
 app.include_router(item_router.router)
+app.include_router(chat_router.router)
+
 @app.get("/health")
 def health():
     return {"status": "ok"}

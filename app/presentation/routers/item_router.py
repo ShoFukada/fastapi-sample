@@ -19,6 +19,7 @@ def get_item_usecase(db: Session = Depends(get_db)) -> ItemUseCase:
     UseCase を Injector から取り出し、その中の Repository に
     リクエストごとの db session を注入するための関数
     """
+    # singletonについては初回injector.get()でインスタンスが生成され、以降はそれを返す
     usecase = injector.get(ItemUseCase)
     # Repository が ItemRepository ならセッションをセット
     if isinstance(usecase.item_repository, ItemRepository):

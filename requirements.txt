@@ -13,3 +13,4 @@ uvicorn
 sqladmin
 alembic
 injector
+psycopg2-binary
