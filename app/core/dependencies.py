@@ -13,6 +13,8 @@ from app.application.usecases.chat_usecase import ChatSessionUseCase
 from app.infrastructure.repositories.chat_repository import ChatSessionRepository
 from app.application.usecases.user_usecase import UserUseCase
 from app.infrastructure.repositories.user_repository import UserRepository
+from app.application.usecases.chat_usecase import ChatMessageUseCase
+from app.infrastructure.repositories.chat_repository import ChatMessageRepository
 
 def get_item_usecase(db: Session = Depends(get_db)):
     usecase = injector.get(ItemUseCase)
@@ -24,6 +26,12 @@ def get_chat_session_usecase(db: Session = Depends(get_db)):
     usecase = injector.get(ChatSessionUseCase)
     if isinstance(usecase.chat_session_repository, ChatSessionRepository):
         usecase.chat_session_repository.set_db_session(db)
+    return usecase
+
+def get_chat_message_usecase(db: Session = Depends(get_db)):
+    usecase = injector.get(ChatMessageUseCase)
+    if isinstance(usecase.chat_message_repository, ChatMessageRepository):
+        usecase.chat_message_repository.set_db_session(db)
     return usecase
 
 def get_user_usecase(db: Session = Depends(get_db)):

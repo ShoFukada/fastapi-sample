@@ -21,7 +21,7 @@ class CreateItemRequest(BaseModel):
 
 # Chat/Session
 class CreateSessionRequest(BaseModel):
-    user_id: str
+    # user_id: str
     title: str
 
 class ChatSessionResponse(BaseModel):
@@ -32,7 +32,11 @@ class ChatSessionResponse(BaseModel):
 
 class ChatRole(str, Enum):
     USER = "user"
-    AI = "ai"
+    ASSISTANT = "assistant"
+    SYSTEM = "system"
+
+
+
 
 # Chat/Session/Message
 class MessageResponse(BaseModel):
@@ -43,6 +47,16 @@ class MessageResponse(BaseModel):
     created_at: datetime
     # prompt: Optional[str]
     # filter_query: Optional[FilterQuery]
+
+class RequestFilterParams(BaseModel):
+    created_at_start: Optional[datetime]
+    created_at_end: Optional[datetime]
+
+class MessageRequest(BaseModel):
+    question: str
+    filter_params: Optional[RequestFilterParams]
+
+
 
 
 # User

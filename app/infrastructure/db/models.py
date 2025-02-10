@@ -83,7 +83,7 @@ class ChatMessageORM(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     session_id = Column(String, ForeignKey("chat_session.id"), nullable=False)
-    role = Column(Enum("user", "ai", name="chat_role"), nullable=False)
+    role = Column(Enum("user", "assistant", "system", name="chat_role"), nullable=False)
     content = Column(Text, nullable=False)
     prompt = Column(Text, nullable=True)
     filter_query = Column(JSONB, nullable=True)
@@ -92,6 +92,25 @@ class ChatMessageORM(Base):
     # リレーション
     session = relationship("ChatSessionORM", back_populates="messages")
     retrieved_docs = relationship("RetrievedDocORM", back_populates="chat_message")
+
+    def to_entity(self):
+        from app.domain.models.chat import ChatMessage, ChatRole
+
+        domain_msg = ChatMessage(
+            id=self.id,
+            session_id=self.session_id,
+            role=ChatRole(self.role),
+            content=self.content,
+            prompt_str=self.prompt,
+            filter_query=self.filter_query,
+            created_at=self.created_at,
+            retrieved_docs=[]
+        )
+
+        if self.retrieved_docs:
+            domain_msg.retrieved_docs = [doc_orm.to_entity() for doc_orm in self.retrieved_docs]
+
+        return domain_msg
 
 
 class RetrievedDocORM(Base):
@@ -107,3 +126,15 @@ class RetrievedDocORM(Base):
 
     # ChatMessage と双方向のリレーション
     chat_message = relationship("ChatMessageORM", back_populates="retrieved_docs")
+
+    def to_entity(self):
+        from app.domain.models.chat import RetrievedDoc
+        return RetrievedDoc(
+            id=self.id,
+            chat_message_id=self.chat_message_id,
+            doc_id=self.doc_id,
+            content=self.content,
+            score=self.score,
+            doc_metadata=self.doc_metadata,
+            created_at=self.created_at
+        )
