@@ -5,7 +5,6 @@ from logging.config import dictConfig
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
-from dotenv import load_dotenv
 
 # ルーターやAdminビューをインポート
 from app.presentation.routers import item_router, chat_router, user_router
@@ -20,8 +19,6 @@ from app.presentation.admin.model_views import (
 
 # ログ設定ファイルをインポート
 from app.core.logging import setup_logging
-
-load_dotenv()
 
 # 1) ログ設定を先に適用
 setup_logging()

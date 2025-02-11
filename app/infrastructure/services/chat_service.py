@@ -10,12 +10,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, Prom
 from langchain.memory import ChatMessageHistory
 from langchain.schema.messages import AIMessage, HumanMessage, SystemMessage, BaseMessage
 from app.core.config import settings
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
-
-# TODO 設定値の安全性をconfig.pyとかで確認する
 
 class ChatMessageService(ChatMessageServiceInterface):
     def __init__(self):

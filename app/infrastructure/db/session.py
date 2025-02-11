@@ -3,8 +3,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 import os
 from app.core.config import settings
-from dotenv import load_dotenv
-load_dotenv()
+
 
 DATABASE_URL = settings.DATABASE_URL
 

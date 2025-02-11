@@ -9,7 +9,6 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 
-# FIXME こっちでdb読み込み
 from dotenv import load_dotenv
 import os
 load_dotenv()
