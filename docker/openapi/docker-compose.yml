@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  # openapiのclient用のコードを自動生成するコンテナ
+  openapi-generator:
+    image: openapitools/openapi-generator-cli
+    volumes:
+      - ../../:/local
+    working_dir: /local
+    command: >
+      generate
+      -i http://host.docker.internal:8000/openapi.json
+      -g typescript-axios
+      -o /local/generated
+      --skip-validate-spec

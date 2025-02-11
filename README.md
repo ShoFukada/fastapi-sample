@@ -74,6 +74,13 @@ alembic revision --autogenerate -m "create items table"
 alembic upgrade head
 ```
 
+### openapi-generator
+以下コマンドを実行するとgenerator/にクライアントコードが生成される
+```
+cd ./docker/openapi
+docker compose up
+```
+
 ## DIについて
 https://zenn.dev/ktnyt/articles/cc5056ce81e9d3
 - Injector
