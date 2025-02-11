@@ -16,7 +16,7 @@ from app.core.dependencies import get_item_usecase, get_current_user_dependency
 router = APIRouter(prefix="/items", tags=["Items"])
 
 @router.get("/", response_model=List[ItemResponse])
-def list_items(usecase: ItemUseCase = Depends(get_item_usecase), current_user = Depends(get_current_user_dependency)):
+def list_items(usecase: ItemUseCase = Depends(get_item_usecase)):
     items = usecase.get_items()
     return [
         ItemResponse(

@@ -45,7 +45,7 @@ def create_session(req: CreateSessionRequest, usecase: ChatSessionUseCase = Depe
 
 # セッション削除
 @router.delete("/sessions/{session_id}", response_model=bool)
-def delete_session(session_id: str, usecase: ChatSessionUseCase = Depends(get_chat_session_usecase)):
+def delete_session(session_id: str, usecase: ChatSessionUseCase = Depends(get_chat_session_usecase), current_user = Depends(get_current_user_dependency)):
     result = usecase.delete_session(session_id)
     if not result:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -53,7 +53,7 @@ def delete_session(session_id: str, usecase: ChatSessionUseCase = Depends(get_ch
 
 # やり取り取得
 @router.get("/sessions/{session_id}/messages", response_model=List[MessageResponse])
-def list_messages(session_id: str, usecase: ChatMessageUseCase = Depends(get_chat_message_usecase)):
+def list_messages(session_id: str, usecase: ChatMessageUseCase = Depends(get_chat_message_usecase), current_user = Depends(get_current_user_dependency)):
     messages = usecase.list_chat_message(session_id)
     return [
         MessageResponse(
