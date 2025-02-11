@@ -49,12 +49,18 @@ class MessageResponse(BaseModel):
     # filter_query: Optional[FilterQuery]
 
 class RequestFilterParams(BaseModel):
-    created_at_start: Optional[datetime]
-    created_at_end: Optional[datetime]
+    created_at_start: Optional[datetime] = None
+    created_at_end: Optional[datetime] = None
+    prefecture: Optional[str] = None
+    location: Optional[str] = None
 
 class MessageRequest(BaseModel):
     question: str
-    filter_params: Optional[RequestFilterParams]
+    filter_params: Optional[RequestFilterParams] = None
+
+class CreateMessageANdAnswerResponse(BaseModel):
+    user_message: MessageResponse
+    assistant_message: MessageResponse
 
 
 
@@ -69,20 +75,20 @@ class DecodedTokenData(BaseModel):
 
 class UserCreateRequest(BaseModel):
     email: str
-    display_name: Optional[str]
+    display_name: Optional[str] = None
     password: str
 
 class UserCreateResponse(BaseModel):
     id: str
     email: str
-    display_name: Optional[str]
+    display_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
 class UserReadResponse(BaseModel):
     id: str
     email: str
-    display_name: Optional[str]
+    display_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

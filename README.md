@@ -126,8 +126,3 @@ class AppModule(Module):
 - Alembic→マイグレーション管理(スキーマの変更履歴の管理)
 
 ## TODO
-- chatmessages endpoint→streaming注意、langchainなども使う
-- user auth→fastapi使う
-- https://chatgpt.com/share/67a8e157-283c-800b-823a-bec03e408bb0
-- エラーハンドリング
-    - 全体をloggerでラップしてエラー時は根本エラーを出力するように設定する？

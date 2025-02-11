@@ -13,7 +13,6 @@ class UserUseCase:
         # FIXME usecase層にこれ置くの正しい？
         hashed_password = get_password_hash(password)
         new_user = User(
-            id=0,
             email=email,
             display_name=display_name,
             hashed_password=hashed_password

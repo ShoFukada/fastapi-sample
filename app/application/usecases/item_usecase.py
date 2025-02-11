@@ -16,7 +16,6 @@ class ItemUseCase:
 
     def create_item(self, name: str, price: int, discount_rate: float) -> Item:
         new_item = Item(
-            id=0,
             name=name,
             price=price,
             discount_rate=discount_rate

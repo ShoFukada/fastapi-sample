@@ -33,6 +33,7 @@ class ItemRepository(ItemRepositoryInterface):
 
     def create_item(self, item: Item) -> Item:
         record = ItemORM(
+            id=item.id,
             name=item.name,
             price=item.price,
             discount_rate=item.discount_rate

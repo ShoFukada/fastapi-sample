@@ -9,6 +9,7 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain.memory import ChatMessageHistory
 from langchain.schema.messages import AIMessage, HumanMessage, SystemMessage, BaseMessage
+from app.core.config import settings
 from dotenv import load_dotenv
 import os
 
@@ -19,33 +20,44 @@ load_dotenv()
 class ChatMessageService(ChatMessageServiceInterface):
     def __init__(self):
         self.pinecone = Pinecone(
-            api_key=os.getenv("PINECONE_API_KEY"),
+            api_key=settings.PINECONE_API_KEY,
         )
-        index_name = os.getenv("PINECONE_INDEX_NAME")
-        index = self.pinecone.Index(index_name)
-        emmbedding_model = os.getenv("EMBEDDING_MODEL_NAME")
-        embeddings = OpenAIEmbeddings(model=emmbedding_model, api_key=os.getenv("OPENAI_API_KEY"))
+        index = self.pinecone.Index(settings.PINECONE_INDEX_NAME)
+        api = settings.PINECONE_INDEX_NAME
+        embeddings = OpenAIEmbeddings(model=settings.EMBEDDING_MODEL_NAME, api_key=settings.OPENAI_API_KEY)
         self.vector_store = PineconeVectorStore(index, embeddings)
         self.model = ChatOpenAI(
-            model=os.getenv("OPENAI_MODEL_NAME"),
-            api_key=os.getenv("OPENAI_API_KEY"),
-            temperature=int(os.getenv("OPENAI_TEMPERATURE")),
-            max_tokens=int(os.getenv("OPENAI_MAX_TOKENS")),
+            model=settings.OPENAI_MODEL_NAME,
+            api_key=settings.OPENAI_API_KEY,
+            temperature=settings.OPENAI_TEMPERATURE,
+            max_tokens=settings.OPENAI_MAX_TOKENS,
         )
-        self.system_prompt = os.getenv("OPENAI_SYSTEM_PROMPT")
-        self.user_prompt = os.getenv("OPENAI_USER_PROMPT")
+        self.streaming_model = ChatOpenAI(
+            model=settings.OPENAI_MODEL_NAME,
+            api_key=settings.OPENAI_API_KEY,
+            temperature=settings.OPENAI_TEMPERATURE,
+            max_tokens=settings.OPENAI_MAX_TOKENS,
+            streaming=True,
+        )
+        self.system_prompt = settings.OPENAI_SYSTEM_PROMPT
+        self.user_prompt = settings.OPENAI_USER_PROMPT
         self.prompt = ChatPromptTemplate(
-            ("system", self.system_prompt),
-            MessagesPlaceholder(variable_name="chat_messages"),
-            ("user", self.user_prompt),
+            [
+                ("system", self.system_prompt),
+                MessagesPlaceholder(variable_name="chat_messages"),
+                ("user", self.user_prompt),
+            ]
         )
 
     def generate_answer(self, user_message: ChatMessage) -> str:
         answer = self.model.invoke(user_message.prompt)
-        return answer
+        return answer.content
     
     def generate_answer_stream(self, user_message: ChatMessage) -> Generator[str, None, None]:
-        pass
+        stream = self.streaming_model.stream(user_message.prompt)
+        for chunk in stream:
+            yield chunk.content
+            
     
     def build_user_message(self, session_id: str, user_content: str, past_messages: List[ChatMessage], filter_params: Optional[FilterParams]) -> ChatMessage:
         """
@@ -71,8 +83,6 @@ class ChatMessageService(ChatMessageServiceInterface):
         for doc, score in documents:
             retrieved_docs.append(
                 RetrievedDoc(
-                    id=doc.id,
-                    chat_message_id="",
                     doc_id=doc.id,
                     content=doc.page_content,
                     score=score,
@@ -80,7 +90,6 @@ class ChatMessageService(ChatMessageServiceInterface):
                 )
             )
         return ChatMessage(
-            id="",
             session_id=session_id,
             role=ChatRole.USER,
             content=user_content,
@@ -108,7 +117,7 @@ class ChatMessageService(ChatMessageServiceInterface):
         return "\n".join(lines)
 
     
-    def _build_chat_messages(self, past_messages: List[ChatMessage]) -> str:
+    def _build_chat_messages(self, past_messages: List[ChatMessage]) -> List[BaseMessage]:
         """
         過去のメッセージをプロンプトに変換
         """
@@ -120,40 +129,78 @@ class ChatMessageService(ChatMessageServiceInterface):
                 history.add_message(AIMessage(message.content))
             else:
                 history.add_message(SystemMessage(message.content))
-        return history
+        return history.messages
     
-    def _build_context(self, documents: List[RetrievedDoc]) -> str:
+    def _build_context(
+        self,
+        documents_with_scores: List[Tuple[Document, float]]
+    ) -> str:
         """
-        metadata, content を文字列に整形して返す。
+        similarity_search_with_score から返却される (Document, float) のタプルリストを受け取り、
+        メタデータやテキストを1つの文字列に整形して返す。
+        
         例:
         [Doc 1]
-        doc_id=abc123
+        metadata={'category': 'foo'}
+        content=
+        Lorem ipsum ...
         score=0.88
-        metadata={'category':'foo'}
-        content=Lorem ipsum ...
-        
+
         [Doc 2]
-        doc_id=def456
-        score=0.77
         ...
         """
         lines = []
-        for i, doc in enumerate(documents, start=1):
+        for i, (doc, score) in enumerate(documents_with_scores, start=1):
             lines.append(f"[Doc {i}]")
-            lines.append(f"metadata={doc.doc_metadata}")
-            lines.append(f"content=\n{doc.content}")
-            lines.append("")
+            lines.append(f"metadata={doc.metadata}")        # doc.metadata でOK
+            lines.append(f"content=\n{doc.page_content}")
+            lines.append(f"score={score}")
+            lines.append("")  # 空行
 
         return "\n".join(lines)
 
 
+
     def _build_filter(self, filter_params: Optional[FilterParams]) -> dict:
         """
-        filterをdictに変換
-        # TODO
-        https://docs.pinecone.io/guides/data/understanding-metadata
+        FilterParams から Pinecone 用のフィルタ dict を生成する。
+        例:
+            {
+                "created_at": {
+                    "$gte": "2023-01-01T00:00:00",
+                    "$lte": "2023-02-01T00:00:00"
+                },
+                "prefecture": {"$eq": "Tokyo"},
+                "location": {"$eq": "Shibuya"}
+            }
         """
-    
+
+        # フィルタが指定されていない or 全て None なら空 dict を返す
+        if not filter_params:
+            return {}
+
+        filter_dict = {}
+
+        # 日付範囲フィルタ
+        if filter_params.created_at_start or filter_params.created_at_end:
+            created_at_filter = {}
+            if filter_params.created_at_start:
+                created_at_filter["$gte"] = filter_params.created_at_start.isoformat()
+            if filter_params.created_at_end:
+                created_at_filter["$lte"] = filter_params.created_at_end.isoformat()
+            filter_dict["created_at"] = created_at_filter
+
+        # 都道府県フィルタ（完全一致）
+        if filter_params.prefecture:
+            filter_dict["prefecture"] = {"$eq": filter_params.prefecture}
+
+        # 場所フィルタ（完全一致）
+        if filter_params.location:
+            filter_dict["location"] = {"$eq": filter_params.location}
+
+        return filter_dict
+
+
     def _search_pinecone(self, user_content: str, filter: dict) -> List[Tuple[Document, float]]:
         """
         pinecone検索 score付き

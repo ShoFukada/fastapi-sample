@@ -15,7 +15,7 @@ class ChatMessageServiceInterface(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def generate_answer_stream(self, user_content: str, filter_params: Optional[RequestFilterParams]) -> Generator[str, None, None]:
+    def generate_answer_stream(self, user_message: ChatMessage) -> Generator[str, None, None]:
         raise NotImplementedError
     
     @abstractmethod

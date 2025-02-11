@@ -13,14 +13,14 @@ class ChatSessionRepository(ChatSessionRepositoryInterface):
         self._db = db
 
     def list_chat_session(self) -> List[ChatSessionORM]:
-        records = self._db.query(ChatSessionORM).all()
+        records = self._db.query(ChatSessionORM).filter(ChatSessionORM.is_deleted == False).all()
         return [
             r.to_entity()
             for r in records
         ]
     
     def list_chat_session_by_user_id(self, user_id: str) -> List[ChatSessionORM]:
-        records = self._db.query(ChatSessionORM).filter(ChatSessionORM.user_id == user_id).all()
+        records = self._db.query(ChatSessionORM).filter(ChatSessionORM.user_id == user_id, ChatSessionORM.is_deleted == False).all()
         return [
             r.to_entity()
             for r in records
@@ -28,7 +28,9 @@ class ChatSessionRepository(ChatSessionRepositoryInterface):
 
     def create_chat_session(self, chat_session: ChatSession) -> ChatSessionORM:
         record = ChatSessionORM(
+            id=chat_session.id,
             user_id=chat_session.user_id,
+            title=chat_session.title,
             created_at=chat_session.created_at
         )
         self._db.add(record)
@@ -37,16 +39,22 @@ class ChatSessionRepository(ChatSessionRepositoryInterface):
         return record.to_entity()
 
     def get_session(self, session_id: str) -> Optional[ChatSessionORM]:
-        record = self._db.query(ChatSessionORM).filter(ChatSessionORM.session_id == session_id).first()
+        record = self._db.query(ChatSessionORM).filter(ChatSessionORM.id == session_id).first()
         if not record:
             return None
         return record.to_entity()
     
     def delete_session(self, session_id: str) -> bool:
-        record = self._db.query(ChatSessionORM).filter(ChatSessionORM.session_id == session_id).first()
+        record = (
+            self._db.query(ChatSessionORM)
+            .filter(ChatSessionORM.id == session_id)
+            .first()
+        )
         if not record:
             return False
-        self._db.delete(record)
+
+        # ソフトデリート (is_deleted を True に)
+        record.is_deleted = True
         self._db.commit()
         return True
 

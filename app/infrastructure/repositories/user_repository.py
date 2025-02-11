@@ -25,6 +25,7 @@ class UserRepository(UserRepositoryInterface):
 
     def create_user(self, user: User):
         new_record = UserORM(
+            id = user.id,
             email = user.email,
             display_name = user.display_name,
             hashed_password = user.hashed_password,

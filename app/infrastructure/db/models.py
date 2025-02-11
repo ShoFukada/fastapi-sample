@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Float, Text, Enum, ForeignKey
+from sqlalchemy import Column, String, DateTime, Float, Text, Enum, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -59,6 +59,7 @@ class ChatSessionORM(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     title = Column(String(255), nullable=True)
+    is_deleted = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # user リレーション (ユーザテーブルを参照)
@@ -66,7 +67,7 @@ class ChatSessionORM(Base):
     user = relationship("UserORM", backref="chat_sessions")
 
     # セッションに紐づくメッセージのリレーション
-    messages = relationship("ChatMessageORM", back_populates="session")
+    messages = relationship("ChatMessageORM", back_populates="session", cascade="all, delete-orphan")
 
     def to_entity(self):
         from app.domain.models.chat import ChatSession
@@ -83,7 +84,7 @@ class ChatMessageORM(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     session_id = Column(String, ForeignKey("chat_session.id"), nullable=False)
-    role = Column(Enum("user", "assistant", "system", name="chat_role"), nullable=False)
+    role = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     prompt = Column(Text, nullable=True)
     filter_query = Column(JSONB, nullable=True)
@@ -91,7 +92,7 @@ class ChatMessageORM(Base):
 
     # リレーション
     session = relationship("ChatSessionORM", back_populates="messages")
-    retrieved_docs = relationship("RetrievedDocORM", back_populates="chat_message")
+    retrieved_docs = relationship("RetrievedDocORM", back_populates="chat_message", cascade="all, delete-orphan")
 
     def to_entity(self):
         from app.domain.models.chat import ChatMessage, ChatRole
