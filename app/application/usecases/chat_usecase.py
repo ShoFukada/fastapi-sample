@@ -73,6 +73,7 @@ class ChatMessageUseCase:
         partial_content = ""
         for chunk in self.chat_message_service.generate_answer_stream(user_message):
             yield ("assistant_chunk", chunk)
+            partial_content += chunk
         
         assistant_message_content = partial_content
         assistant_message = ChatMessage(
