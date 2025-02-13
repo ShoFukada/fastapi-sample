@@ -125,18 +125,21 @@ def create_message_and_answer_stream(
 
     # 2. ジェネレーターを作る (SSEの形式に整形)
     def event_stream():
-        # usecase.generate_answer_stream() が (event_type, payload) のタプルを yield する想定
         stream_gen = usecase.generate_answer_stream(session_id, req.question, filter_params)
         for event_type, payload in stream_gen:
-            if event_type == "user_message_id_event":
-                yield f"event: user_message_id\ndata: {payload}\n\n"
-            elif event_type == "assistant_chunk":
-                yield f"event: chunk\ndata: {payload}\n\n"
-            elif event_type == "assistant_message_id_event":
-                yield f"event: assistant_message_id\ndata: {payload}\n\n"
+            # 例: assistant_chunk のときに改行をエスケープ
+            if event_type == "assistant_chunk":
+                # 改行を \\n に変換
+                safe_payload = payload.replace("\n", "\\n")
+                yield f"event: chunk\ndata: {safe_payload}\n\n"
 
-        # ストリーミング終了
+            elif event_type == "user_message_id_event":
+                yield f"event: user_message_id_event\ndata: {payload}\n\n"
+
+            elif event_type == "assistant_message_id_event":
+                yield f"event: assistant_message_id_event\ndata: {payload}\n\n"
+
+        # 完了
         yield "event: done\ndata: end\n\n"
 
-    # 3. StreamingResponse で SSE を返す
     return StreamingResponse(event_stream(), media_type="text/event-stream")
