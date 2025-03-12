@@ -133,3 +133,4 @@ class AppModule(Module):
 - Alembic→マイグレーション管理(スキーマの変更履歴の管理)
 
 ## TODO
+ecsへgithub actions使ったデプロイとか。別レポにサンプルさまざまあるためここでは省略
